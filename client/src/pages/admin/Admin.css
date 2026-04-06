@@ -1,0 +1,192 @@
+/* =========================
+   ADMIN LAYOUT
+========================= */
+
+.admin {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  background: #f5f7fa;
+  min-height: 100vh;
+  font-family: "Inter", sans-serif;
+}
+
+/* =========================
+   SECTION HEADINGS
+========================= */
+
+.admin h3 {
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+/* =========================
+   SLOT GRID SECTION
+========================= */
+
+.admin .slots {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+/* Grid layout */
+
+.admin .slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+/* Empty message */
+
+.admin .no-slot-message {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+/* =========================
+   PARKING SLOT DESIGN
+========================= */
+
+.admin .slot {
+  position: relative;
+  background: #e5e7eb;
+  border-radius: 10px;
+  height: 80px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+
+  /* Parking slot feel */
+  border: 2px dashed #9ca3af;
+
+  transition: all 0.2s ease;
+}
+
+/* Parking lines effect */
+.admin .slot::before,
+.admin .slot::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 70%;
+  background: #9ca3af;
+  top: 15%;
+  border-radius: 4px;
+}
+
+.admin .slot::before {
+  left: 6px;
+}
+
+.admin .slot::after {
+  right: 6px;
+}
+
+/* Hover effect */
+
+.admin .slot:hover {
+  background: #d1d5db;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* =========================
+   ADD SLOT SECTION
+========================= */
+
+.admin .add-slot {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+/* Input group */
+
+.admin .fields {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+/* Inputs */
+
+.admin .fields input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  outline: none;
+  font-size: 14px;
+  min-width: 120px;
+
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin .fields input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.admin .submit-btn {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  background: #6366f1;
+  color: #ffffff;
+
+  transition: all 0.2s ease;
+}
+
+/* Hover */
+
+.admin .submit-btn:hover {
+  background: #4f46e5;
+  transform: translateY(-1px);
+}
+
+/* Cancel button (second button styling) */
+
+.admin .submit-btn:last-child {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.admin .submit-btn:last-child:hover {
+  background: #d1d5db;
+}
+
+/* =========================
+   RESPONSIVE TOUCH
+========================= */
+
+@media (max-width: 600px) {
+  .admin .fields {
+    flex-direction: column;
+  }
+
+  .admin .submit-btn {
+    width: 100%;
+  }
+}

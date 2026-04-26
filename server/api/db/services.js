@@ -66,7 +66,7 @@ const getAvailableSlot = async (parking_space_id) => {
  * Soft deletes the registered vehicle entry from the db
  * @param {string} otp - 4 digit unique otp
  * @param {string} phno - 10 degit phone number
- * @returns {{isSuccess: boolean, slot_num?: number, floor?: string}} success message and slot information
+ * @returns {{isSuccess: boolean, slot_num?: number, floor?: string, license_plate?: string}} success message and slot information
  */
 const unregisterVehicle = async (otp, phno) => {
   const conn = await pool.getConnection();
@@ -74,7 +74,7 @@ const unregisterVehicle = async (otp, phno) => {
     await conn.beginTransaction();
 
     const [rows] = await conn.execute(
-      `SELECT v.slot_assigned, ps.slot_num, ps.floor
+      `SELECT v.slot_assigned, v.license_plate, ps.slot_num, ps.floor
        FROM vehicles v
        JOIN parking_slots ps
         ON ps.id = v.slot_assigned
@@ -98,6 +98,7 @@ const unregisterVehicle = async (otp, phno) => {
       isSuccess: true,
       slot_num: rows[0].slot_num,
       floor: rows[0].floor,
+      license_plate: rows[0].license_plate,
     };
   } catch {
     return { isSuccess: false };
@@ -172,6 +173,39 @@ const getParkingSlots = async (parking_space_id) => {
   }
 };
 
+/**
+ * Gets a registered vehicle ticket
+ * @param {string} phno - phone number
+ * @param {string} otp - One time password
+ * @returns {{isSuccess: boolean, license_plate?: string, slot_num?: string, floor?: string}}
+ */
+const getTicketInfo = async (phno, otp) => {
+  try {
+    const slots = await query(
+      `SELECT
+       v.license_plate,
+       ps.slot_num,
+       ps.floor
+      FROM vehicles
+      JOIN parking_slots ON v.slot_assigned = ps.id
+      WHERE v.otp=? AND v.phno=?`,
+      [phno, otp]
+    );
+
+    return {
+      isSuccess: true,
+      license_plate: slots[0].license_plate,
+      slot_num: slots[0].slot_num,
+      floor: slots[0].floor,
+    };
+  } catch {
+    return {
+      isSuccess: false,
+      message: "Can't get vehicle ticket information.",
+    };
+  }
+};
+
 module.exports = {
   registerVehicle,
   getAvailableSlot,
@@ -179,4 +213,5 @@ module.exports = {
   registerSlot,
   registerPayement,
   getParkingSlots,
+  getTicketInfo,
 };

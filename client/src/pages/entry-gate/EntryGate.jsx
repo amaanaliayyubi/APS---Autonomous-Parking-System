@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import WelcomePage from "./components/WelcomePage";
 import UserInput from "./components/UserInput";
 import SlotCollection from "./components/SlotCollection";
-import "./EntryGate.css"
+import CameraCapture from "./components/CameraCapture";
+import "./EntryGate.css";
 
 export default function EntryGate() {
   const [UIState, setUIState] = useState("BEGIN");
@@ -37,6 +38,13 @@ export default function EntryGate() {
   return (
     <main className="entry-gate">
       {UIState === "BEGIN" && <WelcomePage setUIState={setUIState} />}
+      {UIState === "CAMERA" && (
+        <CameraCapture
+          setUIState={setUIState}
+          setLicensePlateNum={setLicensePlateNum}
+        />
+      )}
+
       {UIState === "USER_INPUT" && (
         <UserInput
           license_plate_num={license_plate_num}

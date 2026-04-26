@@ -3,7 +3,13 @@ const {
   getAvailableSlot,
   unregisterVehicle,
   registerPayement,
+  getTicketInfo,
 } = require("../db/services.js");
+const { sendSMS } = require("../services/sms.service.js");
+const {
+  buildPaymentReceipt,
+  buildEntryTicket,
+} = require("../services/smsTemplates.js");
 const PARKING_SPACE_ID = process.env.TEST_USERID || 1;
 
 const license_plate_pattern =
@@ -30,6 +36,7 @@ const vehicleEnter = async (req, res) => {
     const license_plate = license_plate_raw.replace(/\s+/g, "").toUpperCase();
     const phno = phno_raw.replace(/\s+/g, "");
 
+    console.log(license_plate, phno);
     if (!license_plate_pattern.test(license_plate) || !phno_pattern.test(phno))
       return res.status(400).json({ message: "Invalid fields" });
 
@@ -47,6 +54,19 @@ const vehicleEnter = async (req, res) => {
     );
     if (!reg_info.isSuccess)
       return res.status(400).json({ message: "DB Error, registration failed" });
+
+    const message = buildEntryTicket({
+      plate: license_plate.replace(/[^A-Z0-9]/g, ""),
+      slot: available_slot.slot_num,
+      floor: available_slot.floor,
+      otp,
+      entryTime: new Date().toLocaleString("en-IN", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }),
+    });
+
+    sendSMS(phno, message).catch(console.error);
 
     return res.status(200).json({
       message:
@@ -101,14 +121,34 @@ const vehicleExit = async (req, res) => {
  */
 const makePayment = async (req, res) => {
   try {
-    const { mode, amount } = req.body;
+    const { mode, amount, phno, otp } = req.body;
     if (!mode || !amount)
+      return res.status(400).json({ message: "Invalid fields!" });
+
+    if (!phno || !otp)
       return res.status(400).json({ message: "Invalid fields!" });
 
     const pay_resp = await registerPayement(PARKING_SPACE_ID, mode, amount);
 
     if (!pay_resp.isSuccess)
       return res.status(400).json({ message: `DB Error, ${pay_resp.message}` });
+
+    const ticket_info = await getTicketInfo(phno, otp);
+    if (!ticket_info.isSuccess)
+      return res
+        .status(400)
+        .json({ message: `DB Error, ${ticket_info.message}` });
+
+    const receiptMessage = buildPaymentReceipt({
+      plate: ticket_info.license_plate,
+      amount,
+      mode,
+      slot: ticket_info.slot_num,
+      floor: ticket_info.floor,
+      entryTime: new Date().toLocaleString(),
+      exitTime: new Date().toLocaleString(),
+    });
+    sendSMS(vehicle.phone, receiptMessage).catch(console.error);
   } catch {
     return res
       .status(400)

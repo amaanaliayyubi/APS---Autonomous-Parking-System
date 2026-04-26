@@ -37,6 +37,8 @@ export default function ExitGate() {
           amount={amount}
           setMode={setMode}
           setAmount={setAmount}
+          phno={phno}
+          otp={otp}
         />
       )}
       {UIState === "END" && <ThankYou setUIState={setUIState} />}

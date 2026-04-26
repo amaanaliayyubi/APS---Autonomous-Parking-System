@@ -7,6 +7,8 @@ export default function Payment({
   amount,
   setMode,
   setAmount,
+  phno,
+  otp
 }) {
   const handlePayment = async () => {
     if (!mode || !amount) {

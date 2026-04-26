@@ -2,8 +2,8 @@ import React from "react";
 
 export default function WelcomePage({ setUIState }) {
   const handleStart = () => {
-    setUIState("USER_INPUT");
-  }
+    setUIState("CAMERA");
+  };
   
   return <section className="welcome-page">
     <h1>Welcome to Autonomous Parking System.</h1>

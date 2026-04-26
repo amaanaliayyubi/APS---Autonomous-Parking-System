@@ -14,6 +14,10 @@ export const unregisterVehicle = (phno, otp) => {
   });
 };
 
-export const makePayment = (mode, amount) => {
-  return post("/gate/payment", { mode, amount });
+export const makePayment = (mode, amount, phno, otp) => {
+  return post("/gate/payment", { mode, amount, phno, otp});
+};
+
+export const recognizePlate = (image) => {
+  return post("/recognize-plate", { image });
 };

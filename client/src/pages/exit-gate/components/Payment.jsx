@@ -17,7 +17,7 @@ export default function Payment({
     }
 
     setUIState("END");
-    const data = await makePayment(mode, amount);
+    const data = await makePayment(mode, amount, phno, otp);
     if (data?.error !== true) {
       setUIState("END");
     } else {

@@ -38,11 +38,13 @@ export default function AddSlot({ setSlot }) {
           type="number"
           value={slot_num_inp}
           onChange={(e) => setSlotNum(e.target.value)}
+          placeholder="Enter Slot Number"
         />
         <input
           type="text"
           value={floor_inp}
           onChange={(e) => setFloor(e.target.value)}
+          placeholder="Enter Floor Name"
         />
         <button className="submit-btn" onClick={handleSubmit}>
           Submit

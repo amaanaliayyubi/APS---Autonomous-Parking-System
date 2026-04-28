@@ -34,9 +34,8 @@ const vehicleEnter = async (req, res) => {
   try {
     const { license_plate_raw, phno_raw } = req.body;
     const license_plate = license_plate_raw.replace(/\s+/g, "").toUpperCase();
-    const phno = phno_raw.replace(/\s+/g, "");
+    const phno = phno_raw.replace(/\D/g, "").slice(-10);
 
-    console.log(license_plate, phno);
     if (!license_plate_pattern.test(license_plate) || !phno_pattern.test(phno))
       return res.status(400).json({ message: "Invalid fields" });
 
@@ -55,18 +54,18 @@ const vehicleEnter = async (req, res) => {
     if (!reg_info.isSuccess)
       return res.status(400).json({ message: "DB Error, registration failed" });
 
-    const message = buildEntryTicket({
-      plate: license_plate.replace(/[^A-Z0-9]/g, ""),
-      slot: available_slot.slot_num,
-      floor: available_slot.floor,
-      otp,
-      entryTime: new Date().toLocaleString("en-IN", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      }),
-    });
+    // const message = buildEntryTicket({
+    //   plate: license_plate.replace(/[^A-Z0-9]/g, ""),
+    //   slot: available_slot.slot_num,
+    //   floor: available_slot.floor,
+    //   otp,
+    //   entryTime: new Date().toLocaleString("en-IN", {
+    //     dateStyle: "medium",
+    //     timeStyle: "short",
+    //   }),
+    // });
 
-    sendSMS(phno, message).catch(console.error);
+    // sendSMS(phno, message).catch(console.error);
 
     return res.status(200).json({
       message:
@@ -91,7 +90,7 @@ const vehicleEnter = async (req, res) => {
 const vehicleExit = async (req, res) => {
   try {
     const { otp_raw, phno_raw } = req.body;
-    const phno = phno_raw.replace(/\s+/g, "");
+    const phno = phno_raw.replace(/\D/g, "").slice(-10);
     const otp = otp_raw.replace(/\s+/g, "");
     if (!phno_pattern.test(phno) || !otp || otp.length < 4)
       return res.status(400).json({ message: "Invalid fields" });
@@ -122,37 +121,54 @@ const vehicleExit = async (req, res) => {
 const makePayment = async (req, res) => {
   try {
     const { mode, amount, phno, otp } = req.body;
-    if (!mode || !amount)
+
+    if (!mode || amount == null)
       return res.status(400).json({ message: "Invalid fields!" });
 
     if (!phno || !otp)
       return res.status(400).json({ message: "Invalid fields!" });
-
-    const pay_resp = await registerPayement(PARKING_SPACE_ID, mode, amount);
-
-    if (!pay_resp.isSuccess)
-      return res.status(400).json({ message: `DB Error, ${pay_resp.message}` });
-
+    
     const ticket_info = await getTicketInfo(phno, otp);
     if (!ticket_info.isSuccess)
       return res
         .status(400)
         .json({ message: `DB Error, ${ticket_info.message}` });
 
-    const receiptMessage = buildPaymentReceipt({
-      plate: ticket_info.license_plate,
-      amount,
+    const pay_resp = await registerPayement(
+      ticket_info.parking_space_id,
       mode,
-      slot: ticket_info.slot_num,
-      floor: ticket_info.floor,
-      entryTime: new Date().toLocaleString(),
-      exitTime: new Date().toLocaleString(),
+      amount
+    );
+
+    if (!pay_resp.isSuccess)
+      return res.status(400).json({ message: `DB Error, ${pay_resp.message}` });
+
+    // const receiptMessage = buildPaymentReceipt({
+    //   plate: ticket_info.license_plate,
+    //   amount,
+    //   mode,
+    //   slot: ticket_info.slot_num,
+    //   floor: ticket_info.floor,
+    //   entryTime: new Date(ticket_info.entry_time).toLocaleString("en-IN", {
+    //     dateStyle: "medium",
+    //     timeStyle: "short",
+    //   }),
+    //   exitTime: new Date().toLocaleString("en-IN", {
+    //     dateStyle: "medium",
+    //     timeStyle: "short",
+    //   }),
+    // });
+
+    // sendSMS(phno, receiptMessage).catch(console.error);
+
+    return res.status(200).json({
+      message: "Payment successful",
     });
-    sendSMS(vehicle.phone, receiptMessage).catch(console.error);
-  } catch {
+  } catch (err) {
+    console.error(err);
     return res
       .status(400)
-      .json({ message: "Some Error Occurred, cant process payement." });
+      .json({ message: "Some Error Occurred, can't process payment." });
   }
 };
 

@@ -161,7 +161,7 @@ const getParkingSlots = async (parking_space_id) => {
   try {
     const slots = await query(
       `SELECT
-       id, slot_num, floor
+       id, slot_num, floor, is_vacant
        FROM parking_slots
        WHERE parking_space_id=?`,
       [parking_space_id]
@@ -183,17 +183,23 @@ const getTicketInfo = async (phno, otp) => {
   try {
     const slots = await query(
       `SELECT
+       ps.parking_space_id,
        v.license_plate,
        ps.slot_num,
        ps.floor
-      FROM vehicles
-      JOIN parking_slots ON v.slot_assigned = ps.id
+      FROM vehicles v
+      JOIN parking_slots ps
+       ON v.slot_assigned = ps.id
       WHERE v.otp=? AND v.phno=?`,
-      [phno, otp]
+      [otp, phno]
     );
+
+    console.log(phno, otp);
+    console.log(slots[0]);
 
     return {
       isSuccess: true,
+      parking_space_id: slots[0].parking_space_id,
       license_plate: slots[0].license_plate,
       slot_num: slots[0].slot_num,
       floor: slots[0].floor,
